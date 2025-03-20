@@ -1,0 +1,103 @@
+<AddExpenseScreen>:
+    name: "add_expense"
+    BoxLayout:
+        orientation: "vertical"
+        padding: 10
+        spacing: 10
+
+        Label:
+            text: "EXPENSE TRACKER"
+            font_size: "30sp"
+            bold: True
+            color: 1, 0, 0, 1
+            size_hint_y: None
+            height: 50
+
+        GridLayout:
+            cols: 2
+            spacing: 10
+
+            Label:
+                text: "Date (M/DD/YY):"
+            TextInput:
+                id: date_input
+                text: "MM/DD/YY"
+                multiline: False
+
+            Label:
+                text: "Description:"
+            TextInput:
+                id: description_input
+                multiline: False
+
+            Label:
+                text: "Amount:"
+            TextInput:
+                id: amount_input
+                text: "0.0"
+                multiline: False
+
+            Label:
+                text: "Payee:"
+            TextInput:
+                id: payee_input
+                multiline: False
+
+            Label:
+                text: "Mode of Payment:"
+            Spinner:
+                id: mode_payment
+                text: "Cash"
+                values: ["Cash", "Card", "UPI", "Other"]
+
+        GridLayout:
+            cols: 2
+            spacing: 5
+            size_hint_y: None
+            height: 40
+
+            Button:
+                text: "Add Expense"
+                on_release: app.add_expense()
+
+            Button:
+                text: "Convert to words before adding"
+                on_release: app.convert_to_words()
+
+            Button:
+                text: "Delete Expense"
+                on_release: app.delete_expense()
+
+            Button:
+                text: "Clear Fields in DataEntry Frame"
+                on_release: app.clear_fields()
+
+            Button:
+                text: "Edit Selected Expense"
+                on_release: app.edit_expense()
+
+            Button:
+                text: "Convert Expense to a sentence"
+                on_release: app.convert_expense_sentence()
+
+        ScrollView:
+            GridLayout:
+                id: expense_list
+                cols: 6
+                size_hint_y: None
+                height: self.minimum_height
+                row_default_height: 30
+                row_force_default: True
+
+                Label:
+                    text: "S.No."
+                Label:
+                    text: "Date"
+                Label:
+                    text: "Payee"
+                Label:
+                    text: "Description"
+                Label:
+                    text: "Amount"
+                Label:
+                    text: "Mode of Payment"

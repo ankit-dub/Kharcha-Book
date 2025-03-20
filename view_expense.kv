@@ -1,0 +1,36 @@
+<ViewExpenseScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: 10
+        spacing: 10
+
+        Label:
+            text: "📅 Select Year"
+            size_hint_y: None
+            height: "30dp"
+        
+        Spinner:
+            id: year_spinner
+            text: "Select Year"
+            values: app.get_years()
+            size_hint_y: None
+            height: "40dp"
+            on_text: root.refresh_data()
+
+        Label:
+            text: "💰 Your Expenses:"
+            size_hint_y: None
+            height: "30dp"
+
+        ScrollView:
+            GridLayout:
+                id: expenses_list
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+
+        Button:
+            text: "🔙 Back to Home"
+            size_hint_y: None
+            height: "50dp"
+            on_press: root.back_to_home()
