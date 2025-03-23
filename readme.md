@@ -1,0 +1,11 @@
+to do 
+- add emojis
+- fix reset password
+- show monhtly budget in UI
+- add datepicker in add expense
+- build .apk
+- darkmode test
+- dropdown for categories, item name for add expense scrren
+- back transition
+- Smart Budget Alerts
+- improve UI
