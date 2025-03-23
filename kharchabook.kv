@@ -554,6 +554,11 @@
                             size: self.size
                             radius: [8]
 
+                Button:
+                    text: "Clear"
+                    size_hint_x: 0.3
+                    on_release: root.clear_fields()
+
             Label:
                 text: "Amount"
                 color: light_text_color

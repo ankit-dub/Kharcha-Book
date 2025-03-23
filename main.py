@@ -470,6 +470,12 @@ class AddExpenseScreen(Screen):
     def __init__(self, **kwargs):
         super(AddExpenseScreen, self).__init__(**kwargs)
         
+    def clear_fields(self):
+        """Clear all input fields on the Add Expense screen."""
+        self.ids.date_input.text = ""
+        self.ids.amount_input.text = ""
+        self.ids.category_input.text = ""
+
     def show_date_picker(self):
         """Display the date picker popup"""
         # Create content with the DatePicker widget
@@ -630,6 +636,8 @@ class ViewExpenseScreen(Screen):
         plt.xticks(rotation=45, ha='right')
         plt.tight_layout()
         plt.show()
+
+    
 
     def show_popup(self, title, message):
         """Reusable popup handler."""
