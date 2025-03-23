@@ -1,8 +1,9 @@
 from kivy.app import App
-from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.image import Image
 from kivy.clock import Clock
 from kivy.core.audio import SoundLoader
@@ -11,8 +12,9 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.switch import Switch
 from kivy.uix.togglebutton import ToggleButton
-from kivy.properties import BooleanProperty, ListProperty
-from datetime import datetime
+from kivy.properties import BooleanProperty, ListProperty, StringProperty, ObjectProperty
+from datetime import datetime, timedelta, date
+import calendar
 import os
 import sys
 import matplotlib.pyplot as plt
@@ -20,6 +22,153 @@ import csv
 import sqlite3
 
 os.environ['KIVY_AUDIO'] = 'sdl2'
+
+# Date Picker Widget
+class DatePicker(BoxLayout):
+    """Custom Date Picker widget"""
+    
+    selected_date = ObjectProperty(None)
+    
+    def __init__(self, callback=None, **kwargs):
+        super(DatePicker, self).__init__(**kwargs)
+        self.orientation = 'vertical'
+        self.callback = callback
+        self.current_date = datetime.now()
+        self.selected_date = self.current_date
+        self.build_layout()
+    
+    def build_layout(self):
+        """Build the date picker UI layout"""
+        self.clear_widgets()
+        
+        # Header with month/year and navigation
+        header = BoxLayout(orientation='horizontal', size_hint=(1, 0.2))
+        prev_month = Button(text='<', size_hint=(0.15, 1))
+        prev_month.bind(on_release=self.prev_month)
+        
+        month_year = Label(
+            text=self.current_date.strftime('%B %Y'),
+            size_hint=(0.7, 1),
+            bold=True
+        )
+        
+        next_month = Button(text='>', size_hint=(0.15, 1))
+        next_month.bind(on_release=self.next_month)
+        
+        header.add_widget(prev_month)
+        header.add_widget(month_year)
+        header.add_widget(next_month)
+        
+        # Days of week header
+        days_header = GridLayout(cols=7, size_hint=(1, 0.1))
+        for day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']:
+            days_header.add_widget(Label(text=day))
+        
+        # Calendar grid
+        self.calendar_grid = GridLayout(cols=7, size_hint=(1, 0.6))
+        
+        # Draw the calendar
+        self.draw_calendar()
+        
+        # Add to main layout
+        self.add_widget(header)
+        self.add_widget(days_header)
+        self.add_widget(self.calendar_grid)
+        
+        # Add "Today" button at bottom
+        today_btn = Button(
+            text='Today',
+            size_hint=(1, 0.1)
+        )
+        today_btn.bind(on_release=self.select_today)
+        self.add_widget(today_btn)
+    
+    def draw_calendar(self):
+        """Draw the days of the month in the grid"""
+        self.calendar_grid.clear_widgets()
+        
+        # Get the first day of the month and number of days
+        year = self.current_date.year
+        month = self.current_date.month
+        
+        # Get the calendar for this month
+        cal = calendar.monthcalendar(year, month)
+        
+        # Fill the calendar grid
+        for week in cal:
+            for day in week:
+                if day == 0:
+                    # Empty day at start/end of month
+                    btn = Button(text='', background_color=(0, 0, 0, 0))
+                    btn.disabled = True
+                else:
+                    # Check if this is the selected date
+                    is_selected = (
+                        self.selected_date.year == year and
+                        self.selected_date.month == month and
+                        self.selected_date.day == day
+                    )
+                    
+                    # Check if this is today
+                    is_today = (
+                        datetime.now().year == year and
+                        datetime.now().month == month and
+                        datetime.now().day == day
+                    )
+                    
+                    # Create the day button
+                    btn = Button(
+                        text=str(day),
+                        background_color=(0.3, 0.6, 1, 1) if is_selected else (0.2, 0.7, 0.3, 1) if is_today else (1, 1, 1, 1)
+                    )
+                    
+                    # Bind the button click
+                    btn.day = day
+                    btn.bind(on_release=lambda btn: self.select_date(btn.day))
+                
+                self.calendar_grid.add_widget(btn)
+    
+    def select_date(self, day):
+        """Handle date selection"""
+        self.selected_date = datetime(
+            self.current_date.year,
+            self.current_date.month,
+            day
+        )
+        
+        # Call the callback with formatted date
+        if self.callback:
+            # Format as M/DD/YY for the app
+            formatted_date = self.selected_date.strftime("%m/%d/%y")
+            self.callback(formatted_date)
+    
+    def prev_month(self, instance):
+        """Go to previous month"""
+        if self.current_date.month == 1:
+            self.current_date = datetime(self.current_date.year - 1, 12, 1)
+        else:
+            self.current_date = datetime(self.current_date.year, self.current_date.month - 1, 1)
+        self.build_layout()
+    
+    def next_month(self, instance):
+        """Go to next month"""
+        if self.current_date.month == 12:
+            self.current_date = datetime(self.current_date.year + 1, 1, 1)
+        else:
+            self.current_date = datetime(self.current_date.year, self.current_date.month + 1, 1)
+        self.build_layout()
+    
+    def select_today(self, instance):
+        """Set date to today"""
+        today = datetime.now()
+        self.current_date = datetime(today.year, today.month, 1)
+        self.selected_date = today
+        self.build_layout()
+        
+        # Call the callback with today's date
+        if self.callback:
+            formatted_date = today.strftime("%m/%d/%y")
+            self.callback(formatted_date)
 
 # 🎯 --- Database Setup ---
 class Database:
@@ -104,6 +253,16 @@ class Database:
         total = self.cursor.fetchone()[0]
         return float(total) if total else 0
 
+    def check_budget_exceeded(self, user_id):
+        """Check if the current month expenses exceed the set budget.
+        Returns a tuple (exceeded, budget, expenses) where exceeded is a boolean."""
+        budget = self.get_monthly_budget(user_id)
+        expenses = self.get_monthly_expense_total(user_id)
+        
+        if budget > 0 and expenses > budget:
+            return (True, budget, expenses)
+        return (False, budget, expenses)
+
 
 # --- Welcome Screen ---
 class WelcomeScreen(Screen):
@@ -128,8 +287,8 @@ class WelcomeScreen(Screen):
 
 # 🌟 --- Login Screen ---
 class LoginScreen(Screen):
-    dark_mode = BooleanProperty(False)
-    background_color = ListProperty([1, 1, 1, 1])
+    dark_mode = BooleanProperty(True)  # Changed from False to True to enable dark mode by default
+    background_color = ListProperty([0, 0, 0, 1])  # Changed initial color to dark
 
     def login_user(self):
         """Handle user login."""
@@ -237,12 +396,35 @@ class RegisterScreen(Screen):
 
 # 🏠 --- Home Screen ---
 class HomeScreen(Screen):
+    def on_enter(self):
+        """Called when the screen is entered, display budget and check if exceeded"""
+        self.display_budget()
+        self.check_budget_status()
+
+    def check_budget_status(self):
+        """Check if budget is exceeded and show notification if needed"""
+        user_id = self.manager.current_user_id
+        exceeded, budget, expenses = self.manager.db.check_budget_exceeded(user_id)
+        
+        if exceeded:
+            # Show budget alert popup
+            budget_alert = BudgetAlertPopup(budget, expenses)
+            Clock.schedule_once(lambda dt: budget_alert.open(), 0.5)
+
+    def display_budget(self):
+        user_id = self.manager.current_user_id
+        budget = self.manager.db.get_monthly_budget(user_id)
+        budget_text = f"Monthly Budget: ₹{budget}" if budget else "No budget set"
+        self.ids.budget_label.text = budget_text
+
     def add_expense_screen(self):
         """Navigate to Add Expense screen."""
+        self.manager.transition = SlideTransition(direction='left')
         self.manager.current = "add_expense"
 
     def view_expenses(self):
         """Navigate to View Expenses screen."""
+        self.manager.transition = SlideTransition(direction='left')
         self.manager.current = "view_expense"
 
     def set_budget(self):
@@ -260,6 +442,7 @@ class HomeScreen(Screen):
             on_release=lambda *args: self.save_budget(budget_input.text, popup)
         )
         popup.open()
+        self.display_budget()
 
     def save_budget(self, budget_input, popup):
         """Save the monthly budget."""
@@ -269,6 +452,7 @@ class HomeScreen(Screen):
             popup.dismiss()
         else:
             self.show_popup("Error", "Please enter a valid number!")
+        self.display_budget()
 
     def logout_user(self):
         """Log out and return to Login screen."""
@@ -283,25 +467,72 @@ class HomeScreen(Screen):
 
 # 💸 --- Add Expense Screen ---
 class AddExpenseScreen(Screen):
+    def __init__(self, **kwargs):
+        super(AddExpenseScreen, self).__init__(**kwargs)
+        
+    def show_date_picker(self):
+        """Display the date picker popup"""
+        # Create content with the DatePicker widget
+        content = DatePicker(callback=self.update_date)
+        
+        # Create popup with the date picker
+        self.date_popup = Popup(
+            title="Select Date",
+            content=content,
+            size_hint=(0.9, 0.9),
+            auto_dismiss=True
+        )
+        self.date_popup.open()
+    
+    def update_date(self, selected_date):
+        """Update date_input with the selected date and close popup"""
+        self.ids.date_input.text = selected_date
+        self.date_popup.dismiss()
+    
     def save_expense(self):
         """Save the entered expense data."""
         amount = self.ids.amount_input.text
         category = self.ids.category_input.text
+        date_input = self.ids.date_input.text
         db = self.manager.db
 
         if amount and category:
+            try:
+                # Try to parse the date input (M/DD/YY format)
+                date_obj = datetime.strptime(date_input, "%m/%d/%y")
+                formatted_date = date_obj.strftime("%Y-%m-%d")
+            except ValueError:
+                # If date format is invalid, use today's date
+                formatted_date = datetime.now().strftime("%Y-%m-%d")
+                self.show_popup("Date Format Error", "Invalid date format! Using today's date instead.")
+
             db.add_expense(
                 self.manager.current_user_id,
-                datetime.now().strftime("%Y-%m-%d"),
+                formatted_date,
                 float(amount),
                 category,
             )
+            
+            # Check if this expense pushed the user over their budget
+            exceeded, budget, expenses = db.check_budget_exceeded(self.manager.current_user_id)
+            if exceeded:
+                # Show budget alert popup before returning to home screen
+                budget_alert = BudgetAlertPopup(budget, expenses)
+                budget_alert.open()
+            
+            self.manager.transition = SlideTransition(direction='right')
             self.manager.current = "home"
         else:
             self.show_popup("Error", "Please fill in all fields!")
 
+    def on_pre_enter(self):
+        """Set today's date as default when screen is shown."""
+        today = datetime.now().strftime("%m/%d/%y")
+        self.ids.date_input.text = today
+
     def back_to_home(self):
         """Return to the Home screen."""
+        self.manager.transition = SlideTransition(direction='right')
         self.manager.current = "home"
 
     def show_popup(self, title, message):
@@ -391,10 +622,13 @@ class ViewExpenseScreen(Screen):
         categories = [row[0] for row in data]
         amounts = [row[1] for row in data]
 
-        plt.figure(figsize=(8, 6))
-        plt.pie(amounts, labels=categories, autopct="%1.1f%%", startangle=140)
-        plt.axis("equal")
-        plt.title("Category-wise Expense Breakdown")
+        plt.figure(figsize=(10, 6))
+        plt.bar(categories, amounts, color='skyblue')
+        plt.xlabel('Categories')
+        plt.ylabel('Amount (₹)')
+        plt.title('Category-wise Expense Breakdown')
+        plt.xticks(rotation=45, ha='right')
+        plt.tight_layout()
         plt.show()
 
     def show_popup(self, title, message):
@@ -405,28 +639,94 @@ class ViewExpenseScreen(Screen):
 
     def back_to_home(self):
         """Navigate back to the Home screen."""
+        self.manager.transition = SlideTransition(direction='right')
         self.manager.current = "home"
+
+
+# Budget Alert Popup
+class BudgetAlertPopup(Popup):
+    def __init__(self, budget, expenses, **kwargs):
+        super(BudgetAlertPopup, self).__init__(**kwargs)
+        self.title = "Budget Alert!"
+        self.size_hint = (0.85, 0.4)
+        
+        # Calculate overspend amount and percentage
+        overspend = expenses - budget
+        percentage = (expenses / budget - 1) * 100 if budget > 0 else 0
+        
+        content = BoxLayout(orientation='vertical', spacing=10, padding=[20, 20])
+        
+        # Alert message with red color
+        alert_message = Label(
+            text=f"[color=ff5555]You've exceeded your monthly budget![/color]",
+            markup=True,
+            font_size='18sp',
+            size_hint_y=None,
+            height='40dp'
+        )
+        
+        # Details 
+        details = Label(
+            text=(f"Budget: ₹{budget:.2f}\n"
+                  f"Expenses: ₹{expenses:.2f}\n"
+                  f"Overspent: ₹{overspend:.2f} ({percentage:.1f}%)"),
+            halign='left',
+            font_size='16sp',
+            size_hint_y=None,
+            height='80dp'
+        )
+        details.bind(size=details.setter('text_size'))
+        
+        # Tips for the user
+        tips = Label(
+            text="Consider revising your spending or adjusting your budget.",
+            font_size='14sp',
+            size_hint_y=None,
+            height='40dp',
+            italic=True
+        )
+        
+        # Close button
+        close_button = Button(
+            text="Got it",
+            size_hint=(0.5, None),
+            height='50dp',
+            pos_hint={'center_x': 0.5}
+        )
+        close_button.bind(on_release=self.dismiss)
+        
+        content.add_widget(alert_message)
+        content.add_widget(details)
+        content.add_widget(tips)
+        content.add_widget(close_button)
+        
+        self.content = content
 
 
 # 🚀 --- App Setup ---
 class KharchaBookApp(App):
     def build(self):
         db = Database()
+        # Remove default transition direction from ScreenManager initialization
         sm = ScreenManager()
         sm.db = db
         sm.current_user_id = None
 
         sm.add_widget(WelcomeScreen(name="welcome"))
-        # Assuming your login screen is already built and named 'login'
         sm.add_widget(LoginScreen(name="login"))
         sm.add_widget(RegisterScreen(name="register"))
-        sm.add_widget(HomeScreen(name="home"))  # Ensure HomeScreen exists
+        sm.add_widget(HomeScreen(name="home"))
         sm.add_widget(AddExpenseScreen(name="add_expense"))
         sm.add_widget(ViewExpenseScreen(name="view_expense"))
 
         sm.current = "welcome"
-
+        
         return sm
+        
+    def on_start(self):
+        # Set dark mode as default for app background
+        # This is called after the window is created
+        self.root_window.clearcolor = (0, 0, 0, 1)
 
 if __name__ == "__main__":
     KharchaBookApp().run()

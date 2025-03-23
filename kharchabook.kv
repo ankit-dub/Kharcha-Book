@@ -1,237 +1,820 @@
 #:kivy 2.1.0
 
+# Modern UI color schemes and styles
+#:set primary_color (0.2, 0.7, 0.9, 1)  # Bright blue
+#:set accent_color (0.95, 0.5, 0.2, 1)  # Orange
+#:set dark_bg_color (0.12, 0.12, 0.18, 1)  # Dark navy
+#:set light_text_color (0.95, 0.95, 0.95, 1)  # Almost white
+#:set subtle_color (0.6, 0.6, 0.7, 1)  # Subtle gray-purple
+
+<RoundedButton@Button>:
+    background_color: (0, 0, 0, 0)  # Transparent
+    background_normal: ''
+    canvas.before:
+        Color:
+            rgba: primary_color if self.state == 'normal' else [c*0.8 for c in primary_color]
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [10]
+    color: light_text_color
+    font_size: '16sp'
+    bold: True
+    size_hint_y: None
+    height: '50dp'
+    padding: [15, 10]
+
+<AccentButton@Button>:
+    background_color: (0, 0, 0, 0)  # Transparent
+    background_normal: ''
+    canvas.before:
+        Color:
+            rgba: accent_color if self.state == 'normal' else [c*0.8 for c in accent_color]
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [10]
+    color: light_text_color
+    font_size: '16sp'
+    bold: True
+    size_hint_y: None
+    height: '50dp'
+    padding: [15, 10]
+
+<ModernTextInput@TextInput>:
+    multiline: False
+    padding: [10, 10, 10, 5]
+    background_normal: ''
+    background_active: ''
+    size_hint_y: None
+    height: '50dp'
+    font_size: '16sp'
+    cursor_color: primary_color
+    canvas.before:
+        Color:
+            rgba: (0.2, 0.2, 0.2, 1) if root.parent.dark_mode else (0.95, 0.95, 0.95, 1)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [8]
+        Color:
+            rgba: primary_color if self.focus else (0.3, 0.3, 0.3, 1) if root.parent.dark_mode else (0.8, 0.8, 0.8, 1)
+        Line:
+            rounded_rectangle: [self.pos[0], self.pos[1], self.size[0], self.size[1], 8]
+            width: 1.2
+
+<HeaderLabel@Label>:
+    font_size: '24sp'
+    bold: True
+    size_hint_y: None
+    height: self.texture_size[1] + 20
+    padding: [15, 15]
+    color: light_text_color
+    canvas.before:
+        Color:
+            rgba: (0.15, 0.15, 0.2, 1)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
 <WelcomeScreen>:
+    canvas.before:
+        Color:
+            rgba: dark_bg_color
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            
     BoxLayout:
         orientation: 'vertical'
-        spacing: 10
-        padding: [20, 50, 20, 50]
+        spacing: 30
+        padding: [30, 60, 30, 60]
 
         Image:
             source: "assets/Kharcha_Book_Symbol.png"
-            size_hint: (1, 0.4)
+            size_hint: (1, 0.5)
             fit_mode: "contain"  
 
         Label:
-            text: "[b][color=#FFD700]Kharcha[/color] [color=#FFFFFF]Book[/color][/b]"
+            text: "[b][color=#64E0FF]Kharcha[/color] [color=#FFFFFF]Book[/color][/b]"
             markup: True
-            font_size: '48sp'
+            font_size: '58sp'
             halign: 'center'
             size_hint_y: None
             height: self.texture_size[1]
 
         Label:
             id: tagline_label
-            text: "[i][color=#87CEEB]Money Talks — Make Sure It Says 'Well Spent!'[/color][/i]"
+            text: "[i][color=#A0E0FF]Money Talks — Make Sure It Says 'Well Spent!'[/color][/i]"
             markup: True
-            font_size: '20sp'
+            font_size: '22sp'
             halign: 'center'
             size_hint_y: None
             height: self.texture_size[1]
 
-
 <LoginScreen>:
+    canvas.before:
+        Color:
+            rgba: dark_bg_color
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            
     FloatLayout:
         # Dark mode switch at top-right
         Switch:
             id: dark_mode_switch
             size_hint: None, None
             size: '60dp', '30dp'
-            active: root.dark_mode
+            active: True
             on_active: root.toggle_dark_mode(*args)
             pos_hint: {'right': 0.98, 'top': 0.98}
+            opacity: 0  # Hide the dark mode switch
 
-        # Title with dynamic color
-        Label:
-            text: 'Kharcha Book'
-            font_size: '32sp'
-            size_hint_y: None
-            height: '50dp'
-            pos_hint: {'center_x': 0.5, 'top': 0.8}
-            color: (1, 1, 1, 1) if root.dark_mode else (0, 0, 0, 1)  # 🔥 Dynamic color change
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: 20
+            padding: [40, 60, 40, 60]
+            size_hint: (0.9, 0.8)
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            
+            # Title with dynamic color
+            Label:
+                text: '[b]Kharcha Book[/b]'
+                markup: True
+                font_size: '36sp'
+                size_hint_y: None
+                height: '70dp'
+                color: light_text_color
 
-        # Username field
-        TextInput:
-            id: username
-            hint_text: 'Username'
-            size_hint_y: None
-            height: '50dp'
-            width: 400
-            pos_hint: {'center_x': 0.5, 'top': 0.7}
+            Widget:
+                size_hint_y: None
+                height: '20dp'
+                
+            # Username field
+            Label:
+                text: 'Username'
+                color: light_text_color
+                font_size: '16sp'
+                size_hint_y: None
+                height: '30dp'
+                halign: 'left'
+                text_size: self.size
+                
+            TextInput:
+                id: username
+                hint_text: 'Enter your username'
+                size_hint_y: None
+                height: '50dp'
+                padding: [15, 15]
+                multiline: False
+                background_normal: ''
+                background_color: (0.18, 0.18, 0.23, 1)
+                foreground_color: light_text_color
+                cursor_color: (primary_color[0], primary_color[1], primary_color[2], 1)
+                font_size: '16sp'
 
-        # Password field
-        TextInput:
-            id: password
-            hint_text: 'Password'
-            password: True
-            size_hint_y: None
-            height: '50dp'
-            width: 400
-            pos_hint: {'center_x': 0.5, 'top': 0.63}
+            Widget:
+                size_hint_y: None
+                height: '10dp'
+                
+            # Password field
+            Label:
+                text: 'Password'
+                color: light_text_color
+                font_size: '16sp'
+                size_hint_y: None
+                height: '30dp'
+                halign: 'left'
+                text_size: self.size
+                
+            TextInput:
+                id: password
+                hint_text: 'Enter your password'
+                password: True
+                size_hint_y: None
+                height: '50dp'
+                padding: [15, 15]
+                multiline: False
+                background_normal: ''
+                background_color: (0.18, 0.18, 0.23, 1)
+                foreground_color: light_text_color
+                cursor_color: (primary_color[0], primary_color[1], primary_color[2], 1)
+                font_size: '16sp'
 
-        # Login button
-        Button:
-            text: 'Login'
-            size_hint_y: None
-            height: '50dp'
-            width: 200
-            pos_hint: {'center_x': 0.5, 'top': 0.56}
-            on_press: root.login_user()
+            Widget:
+                size_hint_y: None
+                height: '20dp'
+                
+            # Login button
+            BoxLayout:
+                orientation: 'vertical'
+                spacing: 15
+                size_hint_y: None
+                height: '120dp'
+                
+                Button:
+                    text: 'Login'
+                    size_hint_y: None
+                    height: '50dp'
+                    background_normal: ''
+                    background_color: primary_color
+                    color: light_text_color
+                    font_size: '18sp'
+                    bold: True
+                    on_press: root.login_user()
+                    canvas.before:
+                        Color:
+                            rgba: primary_color if self.state == 'normal' else [c*0.8 for c in primary_color]
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [25]
 
-        # Register button
-        Button:
-            text: 'Register'
-            size_hint_y: None
-            height: '50dp'
-            width: 200
-            pos_hint: {'center_x': 0.5, 'top': 0.49}
-            on_press: root.register_user()
-
-        # Forgot Password button
-        Button:
-            text: 'Forgot Password?'
-            size_hint_y: None
-            height: '30dp'
-            width: 200
-            font_size: '14sp'
-            color: (0.7, 0.7, 0.7, 1)
-            pos_hint: {'center_x': 0.5, 'top': 0.43}
-            on_press: root.show_forgot_password_popup()
-
+                Button:
+                    text: 'Register'
+                    size_hint_y: None
+                    height: '50dp'
+                    background_normal: ''
+                    background_color: (0, 0, 0, 0)
+                    color: primary_color
+                    font_size: '18sp'
+                    bold: True
+                    on_press: root.register_user()
+                    canvas.before:
+                        Color:
+                            rgba: (0.2, 0.2, 0.25, 1) if self.state == 'normal' else (0.25, 0.25, 0.3, 1)
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [25]
+                        Color:
+                            rgba: primary_color
+                        Line:
+                            rounded_rectangle: [self.pos[0], self.pos[1], self.size[0], self.size[1], 25]
+                            width: 1.5
 
 <RegisterScreen>:
-    GridLayout:
-        cols: 1
-        spacing: 10
-        padding: [20, 50, 20, 20]
+    canvas.before:
+        Color:
+            rgba: dark_bg_color
+        Rectangle:
+            pos: self.pos
+            size: self.size
 
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: 20
+        padding: [40, 60, 40, 60]
+        size_hint: (0.9, 0.8)
+        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+        
         Label:
-            text: "New Username"
+            text: '[b]Create Account[/b]'
+            markup: True
+            font_size: '32sp'
+            size_hint_y: None
+            height: '60dp'
+            color: light_text_color
+
+        Widget:
+            size_hint_y: None
+            height: '20dp'
+            
+        # Username field
+        Label:
+            text: 'Choose a Username'
+            color: light_text_color
+            font_size: '16sp'
+            size_hint_y: None
+            height: '30dp'
+            halign: 'left'
+            text_size: self.size
+            
         TextInput:
             id: reg_username
+            hint_text: 'Enter new username'
             multiline: False
+            size_hint_y: None
+            height: '50dp'
+            padding: [15, 15]
+            background_normal: ''
+            background_color: (0.18, 0.18, 0.23, 1)
+            foreground_color: light_text_color
+            cursor_color: (primary_color[0], primary_color[1], primary_color[2], 1)
+            font_size: '16sp'
 
+        Widget:
+            size_hint_y: None
+            height: '10dp'
+            
+        # Password field
         Label:
-            text: "New Password"
+            text: 'Choose a Password'
+            color: light_text_color
+            font_size: '16sp'
+            size_hint_y: None
+            height: '30dp'
+            halign: 'left'
+            text_size: self.size
+            
         TextInput:
             id: reg_password
+            hint_text: 'Enter new password'
             multiline: False
             password: True
+            size_hint_y: None
+            height: '50dp'
+            padding: [15, 15]
+            background_normal: ''
+            background_color: (0.18, 0.18, 0.23, 1)
+            foreground_color: light_text_color
+            cursor_color: (primary_color[0], primary_color[1], primary_color[2], 1)
+            font_size: '16sp'
 
+        Widget:
+            size_hint_y: None
+            height: '30dp'
+            
+        # Buttons
         Button:
-            text: "✅ Register"
+            text: 'Create Account'
+            size_hint_y: None
+            height: '50dp'
+            background_normal: ''
+            background_color: primary_color
+            color: light_text_color
+            font_size: '18sp'
+            bold: True
             on_press: root.register_user()
+            canvas.before:
+                Color:
+                    rgba: primary_color if self.state == 'normal' else [c*0.8 for c in primary_color]
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [25]
 
+        Widget:
+            size_hint_y: None
+            height: '10dp'
+            
         Button:
-            text: "🔙 Back"
+            text: 'Back to Login'
+            size_hint_y: None
+            height: '50dp'
+            background_normal: ''
+            background_color: (0, 0, 0, 0)
+            color: light_text_color
+            font_size: '16sp'
             on_press: app.root.current = "login"
-
+            
 <HomeScreen>:
-    GridLayout:
-        cols: 1
-        spacing: 10
-        padding: [20, 50, 20, 20]
+    canvas.before:
+        Color:
+            rgba: dark_bg_color
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: 25
+        padding: [30, 50, 30, 50]
 
         Label:
-            text: "🏡 Welcome to Kharcha Book!"
-            font_size: 24
+            text: "[b]Welcome to Kharcha Book![/b]"
+            markup: True
+            font_size: '30sp'
+            size_hint_y: None
+            height: '60dp'
+            color: light_text_color
 
-        Button:
-            text: "➕ Add Expense"
-            on_press: root.add_expense_screen()
+        Label:
+            id: budget_label
+            text: ""
+            font_size: '20sp'
+            size_hint_y: None
+            height: '60dp'
+            color: subtle_color
 
-        Button:
-            text: "📊 View Expenses"
-            on_press: app.root.current = "view_expense"
+        Widget:
+            size_hint_y: None
+            height: '20dp'
 
-        Button:
-            text: "⚙️ Set Monthly Budget"
-            on_press: root.set_budget()
+        # Container for buttons with nice spacing
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: 15
+            padding: [20, 0]
+            
+            Button:
+                text: "+ Add Expense"
+                size_hint_y: None
+                height: '60dp'
+                background_normal: ''
+                background_color: accent_color
+                color: light_text_color
+                font_size: '18sp'
+                bold: True
+                on_press: root.add_expense_screen()
+                canvas.before:
+                    Color:
+                        rgba: accent_color if self.state == 'normal' else [c*0.8 for c in accent_color]
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [10]
 
+            Button:
+                text: "View Expenses"
+                size_hint_y: None
+                height: '60dp'
+                background_normal: ''
+                background_color: primary_color
+                color: light_text_color
+                font_size: '18sp'
+                bold: True
+                on_press: app.root.current = "view_expense"
+                canvas.before:
+                    Color:
+                        rgba: primary_color if self.state == 'normal' else [c*0.8 for c in primary_color]
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [10]
+
+            Button:
+                text: "₹ Set Monthly Budget"
+                size_hint_y: None
+                height: '60dp'
+                background_normal: ''
+                background_color: (0.3, 0.6, 0.3, 1)
+                color: light_text_color
+                font_size: '18sp'
+                bold: True
+                on_press: root.set_budget()
+                canvas.before:
+                    Color:
+                        rgba: (0.3, 0.6, 0.3, 1) if self.state == 'normal' else (0.25, 0.5, 0.25, 1)
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [10]
+
+        Widget:
+            size_hint_y: 1
+            
         Button:
-            text: "🔙 Logout"
+            text: "Logout"
+            size_hint: (0.5, None)
+            height: '50dp'
+            pos_hint: {'center_x': 0.5}
+            background_normal: ''
+            background_color: (0, 0, 0, 0)
+            color: subtle_color
+            font_size: '16sp'
             on_press: root.logout_user()
+            canvas.before:
+                Color:
+                    rgba: (0.2, 0.2, 0.25, 1) if self.state == 'normal' else (0.25, 0.25, 0.3, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [25]
+                Color:
+                    rgba: subtle_color
+                Line:
+                    rounded_rectangle: [self.pos[0], self.pos[1], self.size[0], self.size[1], 25]
+                    width: 1.2
 
 <AddExpenseScreen>:
-    GridLayout:
-        cols: 1
-        spacing: 10
-        padding: [20, 50, 20, 20]
+    canvas.before:
+        Color:
+            rgba: dark_bg_color
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: 20
+        padding: [30, 40, 30, 40]
 
         Label:
-            text: "Enter Amount"
-        TextInput:
-            id: amount_input
-            multiline: False
+            text: "[b]Add New Expense[/b]"
+            markup: True
+            font_size: '28sp'
+            size_hint_y: None
+            height: '50dp'
+            color: light_text_color
 
-        Label:
-            text: "Enter Category"
-        TextInput:
-            id: category_input
-            multiline: False
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: 15
+            padding: [10, 10]
+            size_hint_y: None
+            height: self.minimum_height
+            
+            Label:
+                text: "Date (M/DD/YY)"
+                color: light_text_color
+                font_size: '16sp'
+                size_hint_y: None
+                height: '30dp'
+                halign: 'left'
+                text_size: self.size
+                
+            BoxLayout:
+                spacing: 10
+                size_hint_y: None
+                height: '50dp'
+                
+                TextInput:
+                    id: date_input
+                    multiline: False
+                    size_hint_x: 0.8
+                    background_normal: ''
+                    background_color: (0.18, 0.18, 0.23, 1)
+                    foreground_color: light_text_color
+                    padding: [15, 15]
+                    font_size: '16sp'
+                    
+                Button:
+                    text: "Pick Date"
+                    size_hint_x: 0.2
+                    background_normal: ''
+                    background_color: primary_color
+                    on_release: root.show_date_picker()
+                    canvas.before:
+                        Color:
+                            rgba: primary_color if self.state == 'normal' else [c*0.8 for c in primary_color]
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [8]
 
-        Button:
-            text: "💾 Save Expense"
-            on_press: root.save_expense()
+            Label:
+                text: "Amount"
+                color: light_text_color
+                font_size: '16sp'
+                size_hint_y: None
+                height: '30dp'
+                halign: 'left'
+                text_size: self.size
+                
+            TextInput:
+                id: amount_input
+                multiline: False
+                size_hint_y: None
+                height: '50dp'
+                background_normal: ''
+                background_color: (0.18, 0.18, 0.23, 1)
+                foreground_color: light_text_color
+                padding: [15, 15]
+                font_size: '16sp'
 
-        Button:
-            text: "🔙 Back"
-            on_press: root.back_to_home()
+            Label:
+                text: "Category"
+                color: light_text_color
+                font_size: '16sp'
+                size_hint_y: None
+                height: '30dp'
+                halign: 'left'
+                text_size: self.size
+                
+            TextInput:
+                id: category_input
+                multiline: False
+                size_hint_y: None
+                height: '50dp'
+                background_normal: ''
+                background_color: (0.18, 0.18, 0.23, 1)
+                foreground_color: light_text_color
+                padding: [15, 15]
+                font_size: '16sp'
+
+        Widget:
+            size_hint_y: 1
+            
+        BoxLayout:
+            orientation: 'horizontal'
+            spacing: 15
+            size_hint_y: None
+            height: '50dp'
+            
+            Button:
+                text: "Save Expense"
+                background_normal: ''
+                background_color: accent_color
+                color: light_text_color
+                font_size: '18sp'
+                bold: True
+                on_press: root.save_expense()
+                canvas.before:
+                    Color:
+                        rgba: accent_color if self.state == 'normal' else [c*0.8 for c in accent_color]
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [10]
+                
+            Button:
+                text: "Cancel"
+                background_normal: ''
+                background_color: (0.3, 0.3, 0.35, 1)
+                color: light_text_color
+                font_size: '18sp'
+                on_press: root.back_to_home()
+                canvas.before:
+                    Color:
+                        rgba: (0.3, 0.3, 0.35, 1) if self.state == 'normal' else (0.35, 0.35, 0.4, 1)
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [10]
 
 <ViewExpenseScreen>:
-    GridLayout:
-        cols: 1
-        spacing: 10
-        padding: [20, 50, 20, 20]
+    canvas.before:
+        Color:
+            rgba: dark_bg_color
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: 20
+        padding: [30, 40, 30, 40]
 
         Label:
-            text: "Your Expenses"
-            font_size: 24
+            text: "[b]Your Expenses[/b]"
+            markup: True
+            font_size: '28sp'
+            size_hint_y: None
+            height: '50dp'
+            color: light_text_color
 
         GridLayout:
             cols: 2
-
+            spacing: 15
+            size_hint_y: None
+            height: '150dp'
+            padding: [5, 5]
+            
             Label:
                 text: "Start Date (DD-MM-YYYY):"
+                color: light_text_color
+                font_size: '16sp'
+                size_hint_y: None
+                height: '30dp'
+                
             TextInput:
                 id: start_date
-                hint_text: "Start Date (dd-mm-yyyy)"
+                hint_text: "Start Date"
                 multiline: False
+                background_normal: ''
+                background_color: (0.18, 0.18, 0.23, 1)
+                foreground_color: light_text_color
+                padding: [15, 15]
+                font_size: '16sp'
 
             Label:
                 text: "End Date (DD-MM-YYYY):"
+                color: light_text_color
+                font_size: '16sp'
+                size_hint_y: None
+                height: '30dp'
+                
             TextInput:
                 id: end_date
-                hint_text: "End Date (dd-mm-yyyy)"
+                hint_text: "End Date"
                 multiline: False
+                background_normal: ''
+                background_color: (0.18, 0.18, 0.23, 1)
+                foreground_color: light_text_color
+                padding: [15, 15]
+                font_size: '16sp'
 
-        Button:
-            text: "🔍 Filter"
-            on_press: root.apply_filter()
+        BoxLayout:
+            orientation: 'horizontal'
+            spacing: 15
+            size_hint_y: None
+            height: '50dp'
+            
+            Button:
+                text: "Filter"
+                background_normal: ''
+                background_color: primary_color
+                color: light_text_color
+                font_size: '16sp'
+                bold: True
+                on_press: root.apply_filter()
+                canvas.before:
+                    Color:
+                        rgba: primary_color if self.state == 'normal' else [c*0.8 for c in primary_color]
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [10]
+                
+            Button:
+                text: "Show Graph"
+                background_normal: ''
+                background_color: (0.5, 0.3, 0.7, 1)
+                color: light_text_color
+                font_size: '16sp'
+                bold: True
+                on_press: root.show_graph()
+                canvas.before:
+                    Color:
+                        rgba: (0.5, 0.3, 0.7, 1) if self.state == 'normal' else (0.45, 0.25, 0.65, 1)
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [10]
+                
+            Button:
+                text: "Export CSV"
+                background_normal: ''
+                background_color: (0.3, 0.6, 0.3, 1)
+                color: light_text_color
+                font_size: '16sp'
+                bold: True
+                on_press: root.export_to_csv()
+                canvas.before:
+                    Color:
+                        rgba: (0.3, 0.6, 0.3, 1) if self.state == 'normal' else (0.25, 0.55, 0.25, 1)
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [10]
 
-        Button:
-            text: "📈 Show Expense Graph"
-            on_press: root.show_graph()
-
-        Button:
-            text: "📤 Export to CSV"
-            on_press: root.export_to_csv()
-
-        ScrollView:
-            size_hint_y: 0.5
-            GridLayout:
-                cols: 1
+        BoxLayout:
+            orientation: 'vertical'
+            padding: [5, 10]
+            canvas.before:
+                Color:
+                    rgba: (0.15, 0.15, 0.2, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [10]
+                    
+            Label:
+                text: "Expense Details"
+                color: light_text_color
+                font_size: '18sp'
                 size_hint_y: None
-                height: self.minimum_height
-
-                Label:
+                height: '40dp'
+                bold: True
+                
+            ScrollView:
+                size_hint_y: 1
+                bar_width: 10
+                bar_color: primary_color
+                bar_inactive_color: subtle_color
+                effect_cls: "ScrollEffect"
+                scroll_type: ['bars']
+                
+                GridLayout:
                     id: expense_list
-                    text: "Loading expenses..."
-                    font_size: 18
-                    halign: "left"
-                    valign: "top"
+                    cols: 1
                     size_hint_y: None
-                    height: self.texture_size[1]
+                    height: self.minimum_height
+                    padding: [15, 10]
+                    spacing: 2
+                    
+                    Label:
+                        id: expense_list
+                        text: "Loading expenses..."
+                        font_size: '16sp'
+                        halign: "left"
+                        valign: "top"
+                        text_size: self.width, None
+                        size_hint_y: None
+                        height: self.texture_size[1]
+                        color: light_text_color
 
         Button:
-            text: "🔙 Back"
+            text: "Back to Home"
+            size_hint: (0.4, None)
+            height: '50dp'
+            pos_hint: {'center_x': 0.5}
+            background_normal: ''
+            background_color: (0, 0, 0, 0)
+            color: subtle_color
+            font_size: '16sp'
             on_press: root.back_to_home()
+            canvas.before:
+                Color:
+                    rgba: (0.2, 0.2, 0.25, 1) if self.state == 'normal' else (0.25, 0.25, 0.3, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [25]
+                Color:
+                    rgba: subtle_color
+                Line:
+                    rounded_rectangle: [self.pos[0], self.pos[1], self.size[0], self.size[1], 25]
+                    width: 1.2
