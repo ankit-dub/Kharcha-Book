@@ -765,7 +765,7 @@
                     pos: self.pos
                     size: self.size
                     radius: [10]
-                    
+
             Label:
                 text: "Expense Details"
                 color: light_text_color
@@ -773,7 +773,7 @@
                 size_hint_y: None
                 height: '40dp'
                 bold: True
-                
+
             ScrollView:
                 size_hint_y: 1
                 bar_width: 10
@@ -781,25 +781,32 @@
                 bar_inactive_color: subtle_color
                 effect_cls: "ScrollEffect"
                 scroll_type: ['bars']
-                
+
                 GridLayout:
-                    id: expense_list
-                    cols: 1
+                    id: expense_table
+                    cols: 3
                     size_hint_y: None
                     height: self.minimum_height
-                    padding: [15, 10]
-                    spacing: 2
-                    
+
+                    # Header Row with yellow color
                     Label:
-                        id: expense_list
-                        text: "Loading expenses..."
+                        text: "Date"
+                        bold: True
                         font_size: '16sp'
-                        halign: "left"
-                        valign: "top"
-                        text_size: self.width, None
-                        size_hint_y: None
-                        height: self.texture_size[1]
-                        color: light_text_color
+                        color: 1, 1, 0, 1  # Yellow
+
+                    Label:
+                        text: "Amount"
+                        bold: True
+                        font_size: '16sp'
+                        color: 1, 1, 0, 1  # Yellow
+
+                    Label:
+                        text: "Category"
+                        bold: True
+                        font_size: '16sp'
+                        color: 1, 1, 0, 1  # Yellow
+
 
         Button:
             text: "Back to Home"

@@ -475,7 +475,7 @@ class AddExpenseScreen(Screen):
         self.ids.date_input.text = ""
         self.ids.amount_input.text = ""
         self.ids.category_input.text = ""
-
+        
     def show_date_picker(self):
         """Display the date picker popup"""
         # Create content with the DatePicker widget
@@ -549,13 +549,19 @@ class AddExpenseScreen(Screen):
 
 # 📊 --- View Expenses Screen ---
 class ViewExpenseScreen(Screen):
+    """Screen to display saved expenses in a tabular format."""
+
     def on_enter(self):
-        """Load expenses on screen entry."""
+        """Load expenses when this screen is entered."""
         self.load_expenses()
 
     def load_expenses(self, start_date=None, end_date=None):
-        """Load and display expenses with optional date filtering."""
-        self.ids.expense_list.text = ""
+        """Load and display expenses in a table format with optional date filtering."""
+        # Reference to the table layout from the .kv file
+        expense_table = self.ids.expense_table
+        expense_table.clear_widgets()
+
+        # Fetch data from the database
         db = self.manager.db
         user_id = self.manager.current_user_id
 
@@ -570,12 +576,21 @@ class ViewExpenseScreen(Screen):
         db.cursor.execute(query, tuple(params))
         expenses = db.cursor.fetchall()
 
-        if expenses:
-            for exp in expenses:
-                date, amount, category = exp
-                self.ids.expense_list.text += f"{date} | ₹{amount} | {category}\n"
-        else:
-            self.ids.expense_list.text = "No expenses found for the selected dates!"
+        # If no expenses found
+        if not expenses:
+            expense_table.add_widget(Label(text="No expenses found!", size_hint_y=None, height=40))
+            return
+
+        # Header row
+        headers = ["Date", "Amount", "Category"]
+        for header in headers:
+            expense_table.add_widget(Label(text=header, bold=True, color=(0, 0, 0, 1), size_hint_y=None, height=40))
+
+        # Populate table rows
+        for date, amount, category in expenses:
+            expense_table.add_widget(Label(text=str(date), size_hint_y=None, height=30))
+            expense_table.add_widget(Label(text=f"₹{amount}", size_hint_y=None, height=30))
+            expense_table.add_widget(Label(text=category, size_hint_y=None, height=30))
 
     def apply_filter(self):
         """Apply date filters to expenses."""
@@ -636,8 +651,6 @@ class ViewExpenseScreen(Screen):
         plt.xticks(rotation=45, ha='right')
         plt.tight_layout()
         plt.show()
-
-    
 
     def show_popup(self, title, message):
         """Reusable popup handler."""
