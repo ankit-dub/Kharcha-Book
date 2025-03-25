@@ -784,7 +784,7 @@
 
                 GridLayout:
                     id: expense_table
-                    cols: 3
+                    cols: 4
                     size_hint_y: None
                     height: self.minimum_height
 
@@ -807,6 +807,11 @@
                         font_size: '16sp'
                         color: 1, 1, 0, 1  # Yellow
 
+                    Label:
+                        text: "Action"
+                        bold: True
+                        font_size: '16sp'
+                        color: 1, 1, 0, 1  # Yellow
 
         Button:
             text: "Back to Home"

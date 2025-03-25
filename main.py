@@ -230,6 +230,11 @@ class Database:
         )
         self.conn.commit()
 
+    def delete_expense(self, expense_id):
+        """Delete an expense from the database."""
+        self.cursor.execute("DELETE FROM expenses WHERE id = ?", (expense_id,))
+        self.conn.commit()
+    
     def set_monthly_budget(self, user_id, budget):
         """Set monthly budget for a user."""
         self.cursor.execute(
@@ -279,7 +284,7 @@ class WelcomeScreen(Screen):
             print("Sound file not found!")
 
         # Schedule transition to LoginScreen after 5 seconds
-        Clock.schedule_once(self.switch_to_login, 2.5)
+        Clock.schedule_once(self.switch_to_login, 5)
 
     def switch_to_login(self, dt):
         self.manager.current = 'login'
@@ -565,7 +570,7 @@ class ViewExpenseScreen(Screen):
         db = self.manager.db
         user_id = self.manager.current_user_id
 
-        query = "SELECT date, amount, category FROM expenses WHERE user_id = ?"
+        query = "SELECT id, date, amount, category FROM expenses WHERE user_id = ?"
         params = [user_id]
 
         if start_date and end_date:
@@ -582,15 +587,23 @@ class ViewExpenseScreen(Screen):
             return
 
         # Header row
-        headers = ["Date", "Amount", "Category"]
+        headers = ['Date', 'Amount', 'Category', 'Action']
         for header in headers:
-            expense_table.add_widget(Label(text=header, bold=True, color=(0, 0, 0, 1), size_hint_y=None, height=40))
+            expense_table.add_widget(Label(text=header, bold=True, color=(1, 1, 0, 1), size_hint_y=None, height=40))
 
         # Populate table rows
-        for date, amount, category in expenses:
+        for expense_id, date, amount, category in expenses:
             expense_table.add_widget(Label(text=str(date), size_hint_y=None, height=30))
             expense_table.add_widget(Label(text=f"₹{amount}", size_hint_y=None, height=30))
             expense_table.add_widget(Label(text=category, size_hint_y=None, height=30))
+            # Action Button
+            delete_button = Button(text="Delete", on_release=lambda instance, x=expense_id: self.delete_expense(x))
+            expense_table.add_widget(delete_button)
+
+    def delete_expense(self, expense_id):
+        db = self.manager.db
+        db.delete_expense(expense_id)
+        self.load_expenses()
 
     def apply_filter(self):
         """Apply date filters to expenses."""

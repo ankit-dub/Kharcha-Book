@@ -76,7 +76,14 @@ class Database:
         except Exception as e:
             print(f"Failed to add expense: {e}")
 
-
+    def delete_expense(self, expense_id):
+        """Delete an expense from the database."""
+        try:
+            self.cursor.execute("DELETE FROM expenses WHERE id = ?", (expense_id,))
+            self.conn.commit()
+            print("Expense deleted successfully")
+        except sqlite3.Error as e:
+            print(f"Error deleting expense: {e}")
         
     # ✅ Fetch unique years from expenses
     def get_unique_years(self):
