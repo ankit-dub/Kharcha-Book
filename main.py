@@ -284,7 +284,7 @@ class WelcomeScreen(Screen):
             print("Sound file not found!")
 
         # Schedule transition to LoginScreen after 5 seconds
-        Clock.schedule_once(self.switch_to_login, 5)
+        Clock.schedule_once(self.switch_to_login, 4)
 
     def switch_to_login(self, dt):
         self.manager.current = 'login'
