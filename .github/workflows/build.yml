@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # Used to cache dependencies with a timeout
       - name: Get Date
@@ -80,7 +80,7 @@ jobs:
             cmake \
             libffi-dev \
             libssl-dev \
-            automake
+            automake 
 
       # Set up Java 17 required by Gradle
       - name: Setup Java 17 required by Gradle
